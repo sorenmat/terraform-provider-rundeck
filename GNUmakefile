@@ -2,6 +2,7 @@ TEST?=$$(go list ./... |grep -v 'vendor')
 GOFMT_FILES?=$$(find . -name '*.go' |grep -v vendor)
 WEBSITE_REPO=github.com/hashicorp/terraform-website
 PKG_NAME=rundeck
+SHELL=bash
 
 default: build
 
@@ -15,14 +16,7 @@ test: fmtcheck
 
 .ONESHELL:
 testacc: fmtcheck
-	@trap _catch ERR
-	function _catch {
-		scripts/stop_docker.sh
-		exit 1
-	}
-	@scripts/start_docker.sh
-	RUNDECK_AUTH_TOKEN=N4n5Lw6wYlIeJlxGUUyslWWelifGAQsF RUNDECK_URL=http://localhost:4440 TF_ACC=1 go test -count=1 ${TEST} -v ${TESTARGS} -timeout 120m
-	@scripts/stop_docker.sh
+	@scripts/acceptancetests.sh
 
 vet:
 	@echo "go vet ."
